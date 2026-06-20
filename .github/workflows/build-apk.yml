@@ -1,0 +1,54 @@
+name: Build Android APK
+
+# Builds the installable Android app (.apk) in the cloud.
+# Runs automatically on every push, and can be run on demand from the
+# Actions tab (Run workflow). Download the finished app from the run's
+# "Artifacts" section, then send the file to Alex to sideload.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Copy web assets + sync Capacitor
+        run: npm run sync
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install required SDK packages
+        run: sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Build debug APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Upload the APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: alexs-beers-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

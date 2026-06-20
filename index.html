@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Alex's Beers 🍺</title>
+<meta name="description" content="Your personal craft beer tasting journal — log every pint, every pour." />
+<meta name="theme-color" content="#f4a300" />
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Alex's Beers" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="icon" type="image/png" href="icon-192.png" />
+<style>
+  :root {
+    --amber: #f4a300;
+    --amber-deep: #d97e00;
+    --foam: #fff6e0;
+    --malt: #5a2e0c;
+    --malt-dark: #3a1d06;
+    --stout: #1c1208;
+    --hop: #6fae3a;
+    --card: #ffffff;
+    --line: #ecddc2;
+    --ink: #2c1c0c;
+    --muted: #9b8466;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(900px 500px at 80% -10%, #ffe9b0 0%, transparent 60%),
+      radial-gradient(700px 500px at -10% 10%, #ffd98a 0%, transparent 55%),
+      linear-gradient(180deg, #fff8ea 0%, #ffeccb 100%);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- Header ---------- */
+  header {
+    text-align: center;
+    padding: 34px 16px 18px;
+    position: relative;
+  }
+  .logo {
+    font-size: clamp(2.2rem, 7vw, 3.4rem);
+    font-weight: 900;
+    letter-spacing: -1px;
+    margin: 0;
+    color: var(--malt-dark);
+    text-shadow: 0 2px 0 #fff, 0 4px 14px rgba(217,126,0,0.25);
+  }
+  .logo .pour { color: var(--amber-deep); }
+  .tagline {
+    margin: 6px 0 0;
+    color: var(--malt);
+    font-size: clamp(.85rem, 3.5vw, 1.05rem);
+    font-weight: 600;
+    opacity: .85;
+  }
+  .mascot { display:inline-block; margin-bottom: 2px; filter: drop-shadow(0 4px 6px rgba(0,0,0,.18)); animation: bob 3.5s ease-in-out infinite; }
+  @keyframes bob { 0%,100%{ transform: translateY(0) rotate(-2deg);} 50%{ transform: translateY(-5px) rotate(2deg);} }
+
+  /* foam underline */
+  .foam-bar {
+    height: 14px;
+    margin: 14px auto 0;
+    max-width: 1100px;
+    border-radius: 0 0 16px 16px;
+    background:
+      radial-gradient(circle at 8% 0, #fff 0 7px, transparent 8px),
+      radial-gradient(circle at 22% 2px, #fff 0 9px, transparent 10px),
+      radial-gradient(circle at 38% 0, #fff 0 6px, transparent 7px),
+      radial-gradient(circle at 54% 2px, #fff 0 9px, transparent 10px),
+      radial-gradient(circle at 70% 0, #fff 0 7px, transparent 8px),
+      radial-gradient(circle at 86% 2px, #fff 0 8px, transparent 9px),
+      linear-gradient(180deg, var(--amber) 0%, var(--amber-deep) 100%);
+  }
+
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px 80px; }
+
+  /* ---------- Stats ---------- */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin: 22px 0;
+  }
+  @media (max-width: 820px){ .stats{ grid-template-columns: repeat(3,1fr);} }
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 14px 10px;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(120,80,10,0.06);
+  }
+  .stat .num { font-size: clamp(1.3rem, 5vw, 2rem); font-weight: 900; color: var(--amber-deep); line-height: 1; }
+  .stat .lbl { font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-top: 6px; font-weight: 700; }
+  @media (max-width: 560px){ .stats{ grid-template-columns: repeat(2,1fr);} }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .search {
+    flex: 1 1 200px;
+    min-width: 160px;
+    display: flex; align-items: center; gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 0 12px;
+  }
+  .search input { border: 0; outline: 0; background: transparent; width: 100%; padding: 12px 0; font-size: 1rem; color: var(--ink); }
+  select.filter {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    font-size: .95rem;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .btn {
+    border: 0; cursor: pointer; font-weight: 800;
+    border-radius: 12px; padding: 12px 16px; font-size: .95rem;
+    transition: transform .1s ease, filter .15s ease;
+  }
+  .btn:active { transform: translateY(1px) scale(.99); }
+  .btn-primary { background: linear-gradient(180deg, var(--amber) 0%, var(--amber-deep) 100%); color: #3a1d06; box-shadow: 0 6px 16px rgba(217,126,0,.35); }
+  .btn-primary:hover { filter: brightness(1.05); }
+  .btn-ghost { background: #fff; border: 1px solid var(--line); color: var(--malt); }
+  .btn-ghost:hover { background: var(--foam); }
+
+  /* ---------- Shelf grid ---------- */
+  .shelf {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 16px;
+  }
+  .beer {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 22px rgba(120,80,10,0.08);
+    display: flex; flex-direction: column;
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .beer:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(120,80,10,0.16); }
+  .beer.glow { animation: glow 1.6s ease; }
+  @keyframes glow { 0%,100%{box-shadow:0 8px 22px rgba(120,80,10,.08);} 30%{ box-shadow: 0 0 0 4px var(--amber), 0 14px 30px rgba(217,126,0,.4);} }
+
+  .beer .photo {
+    aspect-ratio: 4/3;
+    background: linear-gradient(160deg, #ffd98a, #f4a300 60%, #d97e00);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .beer .photo img { width: 100%; height: 100%; object-fit: cover; }
+  .beer .photo .placeholder { font-size: 3.4rem; filter: drop-shadow(0 3px 4px rgba(0,0,0,.18)); }
+  .beer .style-tag {
+    position: absolute; top: 8px; left: 8px;
+    background: rgba(28,18,8,.78); color: #ffe9b0;
+    font-size: .68rem; font-weight: 800; letter-spacing: .03em;
+    padding: 4px 9px; border-radius: 999px; backdrop-filter: blur(2px);
+  }
+  .beer .del {
+    position: absolute; top: 8px; right: 8px;
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 0; cursor: pointer; font-size: 1rem; line-height: 1;
+    background: rgba(28,18,8,.55); color: #fff;
+    opacity: 0; transition: opacity .15s;
+  }
+  .beer:hover .del { opacity: 1; }
+  .beer .body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .beer .name { font-weight: 800; font-size: 1.05rem; line-height: 1.2; }
+  .beer .brewery { color: var(--muted); font-size: .85rem; font-weight: 600; }
+  .beer .rating { font-size: 1rem; letter-spacing: 1px; margin-top: 2px; }
+  .beer .notes { font-size: .85rem; color: #6a553a; margin-top: 4px; line-height: 1.35; }
+  .beer .food {
+    font-size: .82rem; color: var(--malt); margin-top: 7px; padding-top: 7px;
+    border-top: 1px dashed var(--line); display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  }
+  .beer .food span { font-weight: 700; }
+  .beer .food .food-rate { font-size: .78rem; letter-spacing: 1px; }
+  .pints.forks button.on { filter: none; }
+  .beer .meta { margin-top: auto; padding-top: 8px; display:flex; justify-content: space-between; align-items:center; font-size:.72rem; color: var(--muted); }
+  .beer .abv { background: var(--foam); border:1px solid var(--line); padding: 2px 7px; border-radius: 999px; font-weight: 700; }
+
+  /* ---------- Empty state ---------- */
+  .empty {
+    text-align: center; padding: 60px 20px; color: var(--malt);
+    background: var(--card); border: 2px dashed var(--line); border-radius: 18px;
+  }
+  .empty .big { font-size: 3.6rem; }
+  .empty h3 { margin: 10px 0 4px; }
+  .empty p { color: var(--muted); margin: 0 0 18px; }
+
+  /* ---------- Modal ---------- */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(28,18,8,.55);
+    display: none; align-items: flex-start; justify-content: center;
+    padding: 24px 14px; z-index: 50; overflow-y: auto;
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    background: var(--card); width: 100%; max-width: 480px;
+    border-radius: 18px; padding: 22px; box-shadow: 0 24px 60px rgba(0,0,0,.4);
+    animation: pop .18s ease;
+  }
+  @keyframes pop { from { transform: scale(.94); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal h2 { margin: 0 0 16px; color: var(--malt-dark); display:flex; align-items:center; gap:8px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: .78rem; font-weight: 700; color: var(--malt); margin-bottom: 5px; letter-spacing: .02em; }
+  .field input[type=text], .field input[type=number], .field select, .field textarea {
+    width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px;
+    font-size: 1rem; font-family: inherit; color: var(--ink); background: #fffdf8; outline: none;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(244,163,0,.18); }
+  .field textarea { resize: vertical; min-height: 64px; }
+  .two { display: flex; gap: 12px; }
+  .two > * { flex: 1; }
+
+  /* pint rating picker */
+  .pints { display: flex; gap: 6px; }
+  .pints button {
+    font-size: 1.7rem; background: none; border: 0; cursor: pointer; padding: 0;
+    filter: grayscale(1) opacity(.4); transition: filter .12s, transform .12s;
+  }
+  .pints button.on { filter: none; transform: scale(1.1); }
+  .pints button:hover { transform: scale(1.2); }
+
+  /* photo picker */
+  .photo-pick {
+    border: 2px dashed var(--line); border-radius: 12px; padding: 14px;
+    text-align: center; cursor: pointer; color: var(--muted); font-weight: 600;
+    background: #fffdf8; transition: border-color .15s, background .15s;
+  }
+  .photo-pick:hover { border-color: var(--amber); background: var(--foam); }
+  .photo-pick img { max-height: 130px; border-radius: 8px; margin-top: 4px; }
+
+  .modal-actions { display: flex; gap: 10px; margin-top: 8px; }
+  .modal-actions .btn { flex: 1; }
+
+  /* ---------- Toast ---------- */
+  .toast {
+    position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(120%);
+    background: var(--stout); color: #ffe9b0; padding: 12px 20px; border-radius: 999px;
+    font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,.3); z-index: 80;
+    transition: transform .3s cubic-bezier(.2,1.4,.4,1);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ---------- Passport ---------- */
+  .passport-modal { max-width: 720px; }
+  .passport-head { text-align: center; margin-bottom: 6px; }
+  .passport-head h2 { justify-content: center; }
+  .passport-sub { color: var(--muted); font-size: .85rem; margin: 0 0 16px; text-align:center; }
+  .badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .badge {
+    border: 1px solid var(--line); border-radius: 14px; padding: 14px 12px; text-align: center;
+    background: #fffdf8; position: relative; overflow: hidden;
+  }
+  .badge.earned { background: linear-gradient(180deg,#fff6e0,#ffe7b3); border-color: var(--amber); box-shadow: 0 6px 16px rgba(217,126,0,.18); }
+  .badge.locked { opacity: .72; }
+  .badge .ico { font-size: 2.1rem; line-height: 1; filter: grayscale(1) opacity(.45); }
+  .badge.earned .ico { filter: none; }
+  .badge .bname { font-weight: 800; font-size: .9rem; margin-top: 6px; color: var(--malt-dark); }
+  .badge .bdesc { font-size: .72rem; color: var(--muted); margin-top: 3px; line-height: 1.3; }
+  .badge .stamp { position: absolute; top: 6px; right: 8px; font-size: .7rem; font-weight: 900; color: var(--hop); transform: rotate(8deg); }
+  .badge .prog { margin-top: 8px; height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; }
+  .badge .prog i { display: block; height: 100%; background: var(--amber); border-radius: 99px; }
+  .badge .ptext { font-size: .68rem; color: var(--muted); margin-top: 4px; font-weight: 700; }
+  .passport-empty { text-align:center; color: var(--muted); padding: 30px 10px; }
+
+  /* ---------- View menu (pills) ---------- */
+  .views { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+  .view-pill {
+    border: 1px solid var(--line); background: #fff; color: var(--malt);
+    border-radius: 999px; padding: 9px 16px; font-weight: 800; font-size: .9rem; cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .view-pill:hover { background: var(--foam); }
+  .view-pill.active { background: linear-gradient(180deg, var(--amber), var(--amber-deep)); color: #3a1d06; border-color: var(--amber-deep); box-shadow: 0 4px 12px rgba(217,126,0,.3); }
+
+  /* ---------- Map ---------- */
+  .map-modal { max-width: 560px; }
+  .map-wrap { position: relative; background: linear-gradient(180deg,#eaf6ff,#dff0ff); border-radius: 16px; overflow: hidden; border: 1px solid var(--line); }
+  .map-wrap svg { display: block; width: 100%; height: auto; }
+  .map-pin { cursor: pointer; }
+  .map-pin circle { transition: transform .12s; transform-origin: center; }
+  .map-pin:hover circle { stroke: var(--malt-dark); stroke-width: 2; }
+  .map-legend { font-size: .78rem; color: var(--muted); text-align: center; margin: 10px 0 0; }
+  .map-other { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:12px; }
+  .map-chip { background: var(--foam); border:1px solid var(--line); border-radius:999px; padding:6px 12px; font-size:.82rem; font-weight:700; cursor:pointer; color: var(--malt); }
+  .map-chip:hover { border-color: var(--amber); }
+
+  /* ---------- Taste / Wrapped ---------- */
+  .taste-modal { max-width: 620px; }
+  .taste-hero { text-align:center; background: linear-gradient(135deg,#3a1d06,#7a3d0c); color:#ffe9b0; border-radius:16px; padding:18px; margin-bottom:16px; }
+  .taste-hero .big { font-size: 2.2rem; font-weight: 900; line-height:1; }
+  .taste-hero .sub { font-size:.85rem; opacity:.85; margin-top:4px; }
+  .taste-grid { display:grid; grid-template-columns: repeat(2,1fr); gap:12px; }
+  .tcard { border:1px solid var(--line); border-radius:14px; padding:14px; background:#fffdf8; }
+  .tcard .tlbl { font-size:.7rem; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); font-weight:800; }
+  .tcard .tval { font-size:1.15rem; font-weight:900; color:var(--malt-dark); margin-top:4px; line-height:1.2; }
+  .tcard .tsmall { font-size:.78rem; color:var(--muted); margin-top:2px; }
+  .lean { margin-top:16px; }
+  .lean h3 { margin:0 0 8px; font-size:.9rem; color:var(--malt-dark); }
+  .lean-row { display:flex; align-items:center; gap:10px; margin-bottom:7px; }
+  .lean-row .lname { width:78px; font-size:.8rem; font-weight:700; color:var(--malt); }
+  .lean-row .lbar { flex:1; height:12px; background:var(--line); border-radius:99px; overflow:hidden; }
+  .lean-row .lbar i { display:block; height:100%; border-radius:99px; }
+  .lean-row .lpct { width:38px; text-align:right; font-size:.76rem; font-weight:800; color:var(--muted); }
+
+  footer { text-align: center; color: var(--muted); font-size: .8rem; padding: 0 16px 30px; }
+  footer a { color: var(--amber-deep); }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="mascot" aria-label="Alex's Beers mascot">
+    <svg viewBox="0 0 110 130" width="62" height="73" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="brew" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#ffcf5c"/>
+          <stop offset="1" stop-color="#e08600"/>
+        </linearGradient>
+      </defs>
+      <!-- handle -->
+      <path d="M80 52 q26 4 26 30 t-26 30" fill="none" stroke="#caa24a" stroke-width="9" stroke-linecap="round"/>
+      <!-- glass body -->
+      <path d="M22 40 h58 l-5 78 a6 6 0 0 1 -6 6 h-30 a6 6 0 0 1 -6 -6 z" fill="url(#brew)" stroke="#b9801c" stroke-width="3"/>
+      <!-- shine -->
+      <rect x="30" y="52" width="6" height="58" rx="3" fill="#fff" opacity=".45"/>
+      <!-- bubbles -->
+      <circle cx="55" cy="74" r="3" fill="#fff" opacity=".6"/>
+      <circle cx="63" cy="92" r="2.4" fill="#fff" opacity=".5"/>
+      <circle cx="48" cy="100" r="2" fill="#fff" opacity=".5"/>
+      <!-- foam -->
+      <path d="M18 42 q-2 -16 12 -14 q4 -14 18 -8 q8 -12 20 -4 q16 -4 16 12 q8 2 4 14 q-40 8 -70 0 z" fill="#fff8e8" stroke="#ecd9ad" stroke-width="2"/>
+      <!-- face -->
+      <circle cx="44" cy="62" r="3.4" fill="#5a2e0c"/>
+      <circle cx="62" cy="62" r="3.4" fill="#5a2e0c"/>
+      <path d="M43 72 q10 9 20 0" fill="none" stroke="#5a2e0c" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="38" cy="70" r="3" fill="#ff9b6b" opacity=".55"/>
+      <circle cx="68" cy="70" r="3" fill="#ff9b6b" opacity=".55"/>
+    </svg>
+  </span>
+  <h1 class="logo">Alex's <span class="pour">Beers</span></h1>
+  <p class="tagline">Every pint, every pour — your personal craft beer journal</p>
+  <div class="foam-bar"></div>
+</header>
+
+<div class="wrap">
+
+  <div class="stats" id="stats">
+    <div class="stat"><div class="num" id="s-total">0</div><div class="lbl">Beers logged</div></div>
+    <div class="stat"><div class="num" id="s-styles">0</div><div class="lbl">Styles tried</div></div>
+    <div class="stat"><div class="num" id="s-avg">–</div><div class="lbl">Avg rating</div></div>
+    <div class="stat"><div class="num" id="s-top">–</div><div class="lbl">Top brewery</div></div>
+    <div class="stat"><div class="num" id="s-snack" style="font-size:clamp(.95rem,3vw,1.25rem)">–</div><div class="lbl">Top snack</div></div>
+  </div>
+
+  <div class="views">
+    <button class="view-pill" onclick="openMap()">🗺️ Map</button>
+    <button class="view-pill" onclick="openPassport()">📖 Passport</button>
+    <button class="view-pill" onclick="openTaste()">📊 My Taste</button>
+  </div>
+
+  <div class="toolbar">
+    <div class="search">
+      <span>🔍</span>
+      <input type="text" id="search" placeholder="Search beers, breweries, food, notes…" oninput="render()" />
+    </div>
+    <select class="filter" id="styleFilter" onchange="render()"><option value="">All styles</option></select>
+    <button class="btn btn-ghost" onclick="surprise()">🎲 Surprise me</button>
+    <button class="btn btn-ghost" id="installBtn" style="display:none" onclick="installApp()">📲 Install app</button>
+    <button class="btn btn-primary" onclick="openAdd()">＋ Add a beer</button>
+  </div>
+
+  <div id="shelf" class="shelf"></div>
+
+  <div style="text-align:center; margin-top:28px;">
+    <button class="btn btn-ghost" onclick="exportData()">⬇ Back up my beers</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">⬆ Restore</button>
+    <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importData(event)" />
+  </div>
+
+</div>
+
+<!-- Add/Edit modal -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h2>🍺 <span id="modalTitle">Log a beer</span></h2>
+    <form id="beerForm" onsubmit="saveBeer(event)">
+      <input type="hidden" id="editId" />
+      <div class="field">
+        <label>Beer name *</label>
+        <input type="text" id="f-name" required placeholder="e.g. Hazy Days IPA" />
+      </div>
+      <div class="two">
+        <div class="field">
+          <label>Brewery</label>
+          <input type="text" id="f-brewery" placeholder="e.g. Garage Project" />
+        </div>
+        <div class="field">
+          <label>ABV %</label>
+          <input type="number" id="f-abv" step="0.1" min="0" max="80" placeholder="6.2" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Style</label>
+        <input type="text" id="f-style" list="styleList" placeholder="IPA, Stout, Sour, Pilsner…" />
+        <datalist id="styleList">
+          <option>IPA</option><option>Hazy IPA</option><option>Pale Ale</option><option>Lager</option>
+          <option>Pilsner</option><option>Stout</option><option>Porter</option><option>Sour</option>
+          <option>Wheat / Hefeweizen</option><option>Amber / Red Ale</option><option>Brown Ale</option>
+          <option>Saison</option><option>Belgian</option><option>Pale</option><option>Bitter</option>
+          <option>Fruit Beer</option><option>Barrel-Aged</option><option>Other</option>
+        </datalist>
+      </div>
+      <div class="field">
+        <label>Your rating</label>
+        <div class="pints" id="pints">
+          <button type="button" data-v="1">🍺</button>
+          <button type="button" data-v="2">🍺</button>
+          <button type="button" data-v="3">🍺</button>
+          <button type="button" data-v="4">🍺</button>
+          <button type="button" data-v="5">🍺</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Tasting notes</label>
+        <textarea id="f-notes" placeholder="Tropical, juicy, soft bitterness… would buy again!"></textarea>
+      </div>
+      <div class="field">
+        <label>🍴 What I had with it</label>
+        <input type="text" id="f-food" list="foodList" placeholder="Loaded fries, wings, cheese board…" />
+        <datalist id="foodList">
+          <option>Loaded fries</option><option>Hot wings</option><option>Cheese board</option>
+          <option>Burger</option><option>Pizza</option><option>Nachos</option><option>Salt & pepper squid</option>
+          <option>Pork crackling</option><option>Pretzel</option><option>Tacos</option><option>Curly fries</option>
+          <option>Fish & chips</option><option>Bao buns</option><option>Nothing</option>
+        </datalist>
+      </div>
+      <div class="field" id="foodRatingField" style="display:none">
+        <label>How good was the food?</label>
+        <div class="pints forks" id="forks">
+          <button type="button" data-v="1">🍴</button>
+          <button type="button" data-v="2">🍴</button>
+          <button type="button" data-v="3">🍴</button>
+          <button type="button" data-v="4">🍴</button>
+          <button type="button" data-v="5">🍴</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>📍 Where I drank it</label>
+        <input type="text" id="f-place" list="placeList" placeholder="Christchurch, a mate's BBQ, home…" />
+        <datalist id="placeList">
+          <option>Christchurch</option><option>Riccarton</option><option>Rolleston</option>
+          <option>Rangiora</option><option>Ashburton</option><option>Hanmer Springs</option>
+          <option>Timaru</option><option>Home</option>
+        </datalist>
+      </div>
+      <div class="field">
+        <label>Photo</label>
+        <div class="photo-pick" id="photoPick" onclick="document.getElementById('f-photo').click()">
+          <span id="photoLabel">📷 Tap to add a photo of the can / pint</span>
+          <div id="photoPreview"></div>
+        </div>
+        <input type="file" id="f-photo" accept="image/*" style="display:none" onchange="handlePhoto(event)" />
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button type="button" class="btn btn-ghost" id="shareBtn" style="display:none" onclick="shareCurrentBeer()">📤 Share</button>
+        <button type="submit" class="btn btn-primary">Save to shelf 🍻</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Passport overlay -->
+<div class="overlay" id="passportOverlay" onclick="if(event.target===this)closePassport()">
+  <div class="modal passport-modal">
+    <div class="passport-head">
+      <h2>📖 Alex's Beer Passport</h2>
+      <p class="passport-sub" id="passportSub">Earn stamps as you taste your way through the craft beer world 🍺</p>
+    </div>
+    <div class="badge-grid" id="badgeGrid"></div>
+    <div class="modal-actions" style="margin-top:18px">
+      <button type="button" class="btn btn-primary" onclick="closePassport()">Back to the shelf 🍺</button>
+    </div>
+  </div>
+</div>
+
+<!-- Map overlay -->
+<div class="overlay" id="mapOverlay" onclick="if(event.target===this)closeMap()">
+  <div class="modal map-modal">
+    <div class="passport-head">
+      <h2>🗺️ Where Alex Drank</h2>
+      <p class="passport-sub" id="mapSub">Pins grow with every beer you log at a Canterbury spot</p>
+    </div>
+    <div class="map-wrap" id="mapWrap"></div>
+    <div class="map-other" id="mapOther"></div>
+    <p class="map-legend">Tap a pin or chip to see those beers</p>
+    <div class="modal-actions" style="margin-top:14px">
+      <button type="button" class="btn btn-primary" onclick="closeMap()">Back to the shelf 🍺</button>
+    </div>
+  </div>
+</div>
+
+<!-- Taste / Wrapped overlay -->
+<div class="overlay" id="tasteOverlay" onclick="if(event.target===this)closeTaste()">
+  <div class="modal taste-modal" id="tasteBody"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<footer>
+  Made with 🍺 for Alex &middot; Your beers are saved on this device. Hit <b>Back up my beers</b> now and then so you never lose them.
+</footer>
+
+<script>
+const KEY = "alexs-beers-v1";
+let beers = load();
+let pendingPhoto = null;   // dataURL for the beer being added
+let currentRating = 0;
+let currentFoodRating = 0;
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(KEY)) || []; }
+  catch { return []; }
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(beers)); }
+  catch (e) { toast("⚠ Storage full — back up & remove a few photos"); }
+}
+
+/* ---------- Rendering ---------- */
+function render() {
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  const styleF = document.getElementById("styleFilter").value;
+  refreshStyleFilter();
+
+  let list = beers.slice().sort((a,b) => (b.date||0) - (a.date||0));
+  if (styleF) list = list.filter(b => (b.style||"") === styleF);
+  if (q) list = list.filter(b =>
+    (b.name||"").toLowerCase().includes(q) ||
+    (b.brewery||"").toLowerCase().includes(q) ||
+    (b.notes||"").toLowerCase().includes(q) ||
+    (b.style||"").toLowerCase().includes(q) ||
+    (b.food||"").toLowerCase().includes(q) ||
+    (b.place||"").toLowerCase().includes(q)
+  );
+
+  const shelf = document.getElementById("shelf");
+
+  if (!beers.length) {
+    shelf.innerHTML = `<div class="empty" style="grid-column:1/-1">
+      <div class="big">🍺</div>
+      <h3>Your shelf is empty… for now</h3>
+      <p>Crack one open and log your first craft beer!</p>
+      <button class="btn btn-primary" onclick="openAdd()">＋ Add your first beer</button>
+    </div>`;
+    updateStats();
+    return;
+  }
+  if (!list.length) {
+    shelf.innerHTML = `<div class="empty" style="grid-column:1/-1">
+      <div class="big">🔍</div><h3>No beers match that</h3>
+      <p>Try a different search or style.</p></div>`;
+    updateStats();
+    return;
+  }
+
+  shelf.innerHTML = list.map(b => {
+    const photo = b.photo
+      ? `<img src="${b.photo}" alt="${esc(b.name)}" />`
+      : `<span class="placeholder">${stylePint(b.style)}</span>`;
+    const stars = "🍺".repeat(b.rating||0) + `<span style="opacity:.25">${"🍺".repeat(5-(b.rating||0))}</span>`;
+    return `<div class="beer" id="beer-${b.id}">
+      <div class="photo">
+        ${b.style ? `<span class="style-tag">${esc(b.style)}</span>` : ""}
+        <button class="del" title="Remove" onclick="removeBeer('${b.id}')">✕</button>
+        ${photo}
+      </div>
+      <div class="body" onclick="openEdit('${b.id}')" style="cursor:pointer">
+        <div class="name">${esc(b.name)}</div>
+        ${b.brewery ? `<div class="brewery">${esc(b.brewery)}</div>` : ""}
+        ${b.rating ? `<div class="rating">${stars}</div>` : ""}
+        ${b.notes ? `<div class="notes">${esc(b.notes)}</div>` : ""}
+        ${b.food ? `<div class="food">🍴 <span>${esc(b.food)}</span>${b.foodRating ? ` <b class="food-rate">${"🍴".repeat(b.foodRating)}</b>` : ""}</div>` : ""}
+        <div class="meta">
+          <span>${b.place ? "📍 "+esc(b.place) : (b.date ? new Date(b.date).toLocaleDateString("en-NZ",{day:"numeric",month:"short",year:"numeric"}) : "")}</span>
+          ${b.abv ? `<span class="abv">${b.abv}%</span>` : ""}
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+  updateStats();
+}
+
+function stylePint(style){
+  const s = (style||"").toLowerCase();
+  if (s.includes("stout")||s.includes("porter")||s.includes("brown")) return "🍫";
+  if (s.includes("sour")||s.includes("fruit")) return "🍋";
+  if (s.includes("lager")||s.includes("pils")) return "🍺";
+  return "🍺";
+}
+
+function updateStats() {
+  document.getElementById("s-total").textContent = beers.length;
+  const styles = new Set(beers.map(b=>b.style).filter(Boolean));
+  document.getElementById("s-styles").textContent = styles.size;
+  const rated = beers.filter(b=>b.rating);
+  document.getElementById("s-avg").textContent = rated.length
+    ? (rated.reduce((a,b)=>a+b.rating,0)/rated.length).toFixed(1)+"🍺" : "–";
+  const counts = {};
+  beers.forEach(b => { if(b.brewery) counts[b.brewery]=(counts[b.brewery]||0)+1; });
+  const top = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById("s-top").textContent = top ? top[0] : "–";
+  const snacks = {};
+  beers.forEach(b => { if(b.food) snacks[b.food]=(snacks[b.food]||0)+1; });
+  const topSnack = Object.entries(snacks).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById("s-snack").textContent = topSnack ? topSnack[0] : "–";
+}
+
+function refreshStyleFilter(){
+  const sel = document.getElementById("styleFilter");
+  const cur = sel.value;
+  const styles = [...new Set(beers.map(b=>b.style).filter(Boolean))].sort();
+  sel.innerHTML = `<option value="">All styles</option>` +
+    styles.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join("");
+  if (styles.includes(cur)) sel.value = cur;
+}
+
+/* ---------- Add / Edit ---------- */
+function openAdd(){
+  document.getElementById("beerForm").reset();
+  document.getElementById("editId").value = "";
+  document.getElementById("modalTitle").textContent = "Log a beer";
+  pendingPhoto = null; setRating(0); setFoodRating(0); resetPhotoUI(); updateFoodRatingVisibility();
+  document.getElementById("shareBtn").style.display = "none";
+  document.getElementById("overlay").classList.add("open");
+  document.getElementById("f-name").focus();
+}
+function openEdit(id){
+  const b = beers.find(x=>x.id===id); if(!b) return;
+  document.getElementById("editId").value = id;
+  document.getElementById("modalTitle").textContent = "Edit beer";
+  document.getElementById("f-name").value = b.name||"";
+  document.getElementById("f-brewery").value = b.brewery||"";
+  document.getElementById("f-abv").value = b.abv||"";
+  document.getElementById("f-style").value = b.style||"";
+  document.getElementById("f-notes").value = b.notes||"";
+  document.getElementById("f-food").value = b.food||"";
+  document.getElementById("f-place").value = b.place||"";
+  pendingPhoto = b.photo||null; setRating(b.rating||0); setFoodRating(b.foodRating||0);
+  resetPhotoUI(); updateFoodRatingVisibility();
+  document.getElementById("shareBtn").style.display = "";
+  document.getElementById("overlay").classList.add("open");
+}
+function closeModal(){ document.getElementById("overlay").classList.remove("open"); }
+
+function setRating(v){
+  currentRating = v;
+  document.querySelectorAll("#pints button").forEach(btn=>{
+    btn.classList.toggle("on", Number(btn.dataset.v) <= v);
+  });
+}
+document.querySelectorAll("#pints button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const v = Number(btn.dataset.v);
+    setRating(v === currentRating ? 0 : v); // tap same pint again to clear
+  });
+});
+
+function setFoodRating(v){
+  currentFoodRating = v;
+  document.querySelectorAll("#forks button").forEach(btn=>{
+    btn.classList.toggle("on", Number(btn.dataset.v) <= v);
+  });
+}
+document.querySelectorAll("#forks button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const v = Number(btn.dataset.v);
+    setFoodRating(v === currentFoodRating ? 0 : v); // tap same fork again to clear
+  });
+});
+
+// Only ask "how good was the food?" once there's a snack to rate
+function updateFoodRatingVisibility(){
+  const hasFood = document.getElementById("f-food").value.trim() !== "";
+  document.getElementById("foodRatingField").style.display = hasFood ? "" : "none";
+  if (!hasFood) setFoodRating(0);
+}
+document.getElementById("f-food").addEventListener("input", updateFoodRatingVisibility);
+
+function resetPhotoUI(){
+  const prev = document.getElementById("photoPreview");
+  const label = document.getElementById("photoLabel");
+  if (pendingPhoto){
+    prev.innerHTML = `<img src="${pendingPhoto}" />`;
+    label.textContent = "📷 Photo added — tap to change";
+  } else {
+    prev.innerHTML = "";
+    label.textContent = "📷 Tap to add a photo of the can / pint";
+  }
+}
+
+function handlePhoto(e){
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      // downscale to keep localStorage happy
+      const max = 720;
+      let { width:w, height:h } = img;
+      if (w > h && w > max){ h = h*max/w; w = max; }
+      else if (h > max){ w = w*max/h; h = max; }
+      const c = document.createElement("canvas");
+      c.width = w; c.height = h;
+      c.getContext("2d").drawImage(img, 0, 0, w, h);
+      pendingPhoto = c.toDataURL("image/jpeg", 0.78);
+      resetPhotoUI();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveBeer(e){
+  e.preventDefault();
+  const id = document.getElementById("editId").value;
+  const data = {
+    name: document.getElementById("f-name").value.trim(),
+    brewery: document.getElementById("f-brewery").value.trim(),
+    abv: document.getElementById("f-abv").value.trim(),
+    style: document.getElementById("f-style").value.trim(),
+    notes: document.getElementById("f-notes").value.trim(),
+    food: document.getElementById("f-food").value.trim(),
+    place: document.getElementById("f-place").value.trim(),
+    foodRating: currentFoodRating,
+    rating: currentRating,
+    photo: pendingPhoto,
+  };
+  if (!data.name) return;
+  if (id){
+    const b = beers.find(x=>x.id===id);
+    Object.assign(b, data);
+    toast("Updated 🍻");
+  } else {
+    data.id = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    data.date = Date.now();
+    beers.push(data);
+    toast("Added to your shelf! 🍺");
+  }
+  save(); closeModal(); render();
+  if (!id){ const el = document.getElementById("beer-"+data.id); if(el) el.classList.add("glow"); }
+}
+
+function removeBeer(id){
+  const b = beers.find(x=>x.id===id);
+  if (!confirm(`Remove "${b ? b.name : "this beer"}" from your shelf?`)) return;
+  beers = beers.filter(x=>x.id!==id);
+  save(); render(); toast("Removed");
+}
+
+/* ---------- Surprise me ---------- */
+function surprise(){
+  if(!beers.length){ toast("🍺 Log a few beers first, then I'll pick one for you!"); return; }
+  document.getElementById("search").value="";
+  document.getElementById("styleFilter").value="";
+  render();
+  const pick = beers[Math.floor(Math.random()*beers.length)];
+  const el = document.getElementById("beer-"+pick.id);
+  if(el){
+    el.scrollIntoView({behavior:"smooth", block:"center"});
+    el.classList.remove("glow"); void el.offsetWidth; el.classList.add("glow");
+  }
+  toast(`🎲 Tonight: ${pick.name}!`);
+}
+
+/* ---------- Passport / Badges ---------- */
+function countStyle(test){ return beers.filter(b => test((b.style||"").toLowerCase())).length; }
+
+function computeBadges(){
+  const n = beers.length;
+  const styles = new Set(beers.map(b=>b.style).filter(Boolean)).size;
+  const breweries = new Set(beers.map(b=>b.brewery).filter(Boolean)).size;
+  const ipas = countStyle(s => s.includes("ipa") || s.includes("pale"));
+  const darks = countStyle(s => s.includes("stout") || s.includes("porter") || s.includes("brown"));
+  const sours = countStyle(s => s.includes("sour"));
+  const lagers = countStyle(s => s.includes("lager") || s.includes("pils"));
+  const fives = beers.filter(b => b.rating === 5).length;
+  const foodsRated = beers.filter(b => b.foodRating).length;
+  const perfectPair = beers.some(b => b.rating === 5 && b.foodRating === 5);
+
+  // each: icon, name, desc, have, need (need=0 means boolean badge already counted in have)
+  return [
+    { ico:"🍺", name:"First Pour",   desc:"Log your very first beer",        have:n,          need:1 },
+    { ico:"🙌", name:"Getting Thirsty", desc:"Log 5 beers",                  have:n,          need:5 },
+    { ico:"⭐", name:"Regular",      desc:"Log 10 beers",                    have:n,          need:10 },
+    { ico:"🏆", name:"Connoisseur",  desc:"Log 25 beers",                    have:n,          need:25 },
+    { ico:"👑", name:"Beer Legend",  desc:"Log 50 beers",                    have:n,          need:50 },
+    { ico:"🌈", name:"Style Hunter", desc:"Try 5 different styles",          have:styles,     need:5 },
+    { ico:"🗺️", name:"Brewery Tour", desc:"Try beers from 5 breweries",      have:breweries,  need:5 },
+    { ico:"🌿", name:"Hop Head",     desc:"Log 5 IPAs / pale ales",          have:ipas,       need:5 },
+    { ico:"🖤", name:"Dark Arts",    desc:"Log 5 stouts / porters",          have:darks,      need:5 },
+    { ico:"🍋", name:"Sour Power",   desc:"Log 3 sours",                     have:sours,      need:3 },
+    { ico:"❄️", name:"Crisp Boy",    desc:"Log 5 lagers / pilsners",         have:lagers,     need:5 },
+    { ico:"💯", name:"Top Shelf",    desc:"Give a beer a full 5 pints",      have:fives,      need:1 },
+    { ico:"🍴", name:"Snack Master", desc:"Rate the food on 5 beers",        have:foodsRated, need:5 },
+    { ico:"🤝", name:"Perfect Pairing", desc:"A 5-pint beer + 5-fork food",  have:perfectPair?1:0, need:1 },
+  ];
+}
+
+function openPassport(){
+  const badges = computeBadges();
+  const earned = badges.filter(b => b.have >= b.need).length;
+  document.getElementById("passportSub").textContent =
+    beers.length
+      ? `${earned} of ${badges.length} stamps earned — keep tasting! 🍺`
+      : "Log your first beer to start earning stamps 🍺";
+
+  document.getElementById("badgeGrid").innerHTML = badges.map(b => {
+    const done = b.have >= b.need;
+    const pct = Math.min(100, Math.round((b.have / b.need) * 100));
+    return `<div class="badge ${done ? "earned" : "locked"}">
+      ${done ? `<span class="stamp">✓ EARNED</span>` : ""}
+      <div class="ico">${b.ico}</div>
+      <div class="bname">${b.name}</div>
+      <div class="bdesc">${b.desc}</div>
+      ${done ? "" : `<div class="prog"><i style="width:${pct}%"></i></div>
+        <div class="ptext">${Math.min(b.have,b.need)} / ${b.need}</div>`}
+    </div>`;
+  }).join("");
+
+  document.getElementById("passportOverlay").classList.add("open");
+}
+function closePassport(){ document.getElementById("passportOverlay").classList.remove("open"); }
+
+/* ---------- Map: Where Alex Drank ---------- */
+const CANTERBURY_TOWNS = [
+  { name:"Hanmer Springs", x:95,  y:72 },
+  { name:"Rangiora",       x:240, y:150 },
+  { name:"Christchurch",   x:286, y:204 },
+  { name:"Riccarton",      x:248, y:220 },
+  { name:"Rolleston",      x:205, y:246 },
+  { name:"Ashburton",      x:165, y:322 },
+  { name:"Timaru",         x:190, y:420 },
+];
+function placeCount(name){ return beers.filter(b => (b.place||"").toLowerCase().includes(name.toLowerCase())).length; }
+
+function openMap(){
+  const maxC = Math.max(1, ...CANTERBURY_TOWNS.map(t => placeCount(t.name)));
+  const pins = CANTERBURY_TOWNS.map(t => {
+    const n = placeCount(t.name);
+    const r = n ? 8 + (n/maxC)*15 : 5;
+    return `<g class="map-pin" onclick="filterPlace('${t.name.replace(/'/g,"")}')">
+      <circle cx="${t.x}" cy="${t.y}" r="${r}" fill="${n?'#f4a300':'#cdbf9a'}" fill-opacity="${n?1:0.6}" stroke="#b9801c" stroke-width="1.5"/>
+      ${n ? `<text x="${t.x}" y="${t.y+5}" text-anchor="middle" font-size="14" font-weight="900" fill="#3a1d06">${n}</text>` : ""}
+      <text x="${t.x}" y="${t.y - r - 4}" text-anchor="middle" font-size="12.5" font-weight="700" fill="#5a2e0c">${t.name}</text>
+    </g>`;
+  }).join("");
+
+  document.getElementById("mapWrap").innerHTML = `
+    <svg viewBox="0 0 360 460" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,0 L240,0 Q258,55 238,95 Q300,118 300,150 Q332,176 286,206 Q250,226 272,256 Q242,300 232,342 Q238,402 214,460 L0,460 Z"
+            fill="#e9e0c8" stroke="#cdbf9a" stroke-width="2"/>
+      <path d="M0,118 L40,82 L70,128 L110,90 L150,148 L60,168 L0,158 Z" fill="#dcd2b6" opacity=".7"/>
+      <text x="36" y="116" font-size="11" fill="#a3946f" transform="rotate(-8 36 116)">⛰ Alps</text>
+      <text x="322" y="300" font-size="13" fill="#7fb8d8" font-weight="800" transform="rotate(90 322 300)">PACIFIC</text>
+      ${pins}
+    </svg>`;
+
+  const known = CANTERBURY_TOWNS.map(t => t.name.toLowerCase());
+  const others = {};
+  beers.forEach(b => {
+    const p = (b.place||"").trim();
+    if (p && !known.some(k => p.toLowerCase().includes(k))) others[p] = (others[p]||0)+1;
+  });
+  document.getElementById("mapOther").innerHTML = Object.entries(others).sort((a,b)=>b[1]-a[1])
+    .map(([p,n]) => `<span class="map-chip" onclick="filterPlace('${p.replace(/'/g,"")}')">📍 ${esc(p)} · ${n}</span>`).join("");
+
+  const logged = beers.filter(b => b.place).length;
+  document.getElementById("mapSub").textContent = logged
+    ? `${logged} of ${beers.length} beers have a spot pinned`
+    : "Add a place when you log a beer to see it on the map";
+  document.getElementById("mapOverlay").classList.add("open");
+}
+function closeMap(){ document.getElementById("mapOverlay").classList.remove("open"); }
+function filterPlace(p){
+  closeMap();
+  document.getElementById("styleFilter").value = "";
+  document.getElementById("search").value = p;
+  render();
+  document.getElementById("shelf").scrollIntoView({behavior:"smooth", block:"start"});
+  toast("📍 "+p);
+}
+
+/* ---------- Taste profile / Wrapped ---------- */
+function computeTaste(){
+  const tally = (key) => {
+    const m = {}; beers.forEach(b => { const v=b[key]; if(v) m[v]=(m[v]||0)+1; });
+    return Object.entries(m).sort((a,b)=>b[1]-a[1]);
+  };
+  const styleRatings = {};
+  beers.forEach(b => { if(b.style && b.rating){ (styleRatings[b.style]=styleRatings[b.style]||[]).push(b.rating); } });
+  let bestStyle=null, bestAvg=0;
+  Object.entries(styleRatings).forEach(([s,arr]) => { const a=arr.reduce((x,y)=>x+y,0)/arr.length; if(a>bestAvg){bestAvg=a;bestStyle=s;} });
+  const abvs = beers.map(b=>parseFloat(b.abv)).filter(n=>!isNaN(n));
+  const withStyle = beers.filter(b=>b.style);
+  const cat = (test) => withStyle.filter(b => test(b.style.toLowerCase())).length;
+  return {
+    favStyle: tally("style")[0], favBrewery: tally("brewery")[0], favSnack: tally("food")[0],
+    bestStyle, bestAvg,
+    avgABV: abvs.length ? abvs.reduce((a,b)=>a+b,0)/abvs.length : null,
+    strongest: beers.filter(b=>!isNaN(parseFloat(b.abv))).sort((a,b)=>parseFloat(b.abv)-parseFloat(a.abv))[0],
+    topBeer: beers.filter(b=>b.rating).sort((a,b)=>(b.rating-a.rating)||((b.date||0)-(a.date||0)))[0],
+    total: beers.length,
+    breweries: new Set(beers.map(b=>b.brewery).filter(Boolean)).size,
+    styles: new Set(beers.map(b=>b.style).filter(Boolean)).size,
+    withStyleCount: withStyle.length,
+    leanings: [
+      { name:"Hoppy", n:cat(s=>s.includes("ipa")||s.includes("pale")),                 color:"#6fae3a" },
+      { name:"Dark",  n:cat(s=>s.includes("stout")||s.includes("porter")||s.includes("brown")), color:"#3a1d06" },
+      { name:"Sour",  n:cat(s=>s.includes("sour")||s.includes("fruit")),               color:"#e0b000" },
+      { name:"Crisp", n:cat(s=>s.includes("lager")||s.includes("pils")),               color:"#7fb8d8" },
+    ],
+  };
+}
+
+function openTaste(){
+  const body = document.getElementById("tasteBody");
+  if (!beers.length){
+    body.innerHTML = `<div class="passport-head"><h2>📊 My Taste</h2></div>
+      <div class="passport-empty">Log a few beers and your taste profile shows up here 🍺</div>
+      <div class="modal-actions"><button class="btn btn-primary" onclick="closeTaste()">Back to the shelf 🍺</button></div>`;
+    document.getElementById("tasteOverlay").classList.add("open"); return;
+  }
+  const t = computeTaste();
+  const card = (lbl,val,small) => `<div class="tcard"><div class="tlbl">${lbl}</div><div class="tval">${val}</div>${small?`<div class="tsmall">${small}</div>`:""}</div>`;
+  const maxLean = Math.max(1, ...t.leanings.map(l=>l.n));
+  const leanRows = t.leanings.map(l =>
+    `<div class="lean-row"><span class="lname">${l.name}</span>
+     <span class="lbar"><i style="width:${l.n?Math.max(6,Math.round(l.n/maxLean*100)):0}%;background:${l.color}"></i></span>
+     <span class="lpct">${l.n}</span></div>`).join("");
+
+  body.innerHTML = `
+    <div class="taste-hero"><div class="big">Alex's Beer Taste 🍺</div>
+      <div class="sub">${t.total} beers · ${t.breweries} breweries · ${t.styles} styles</div></div>
+    <div class="taste-grid">
+      ${card("Favourite style", t.favStyle?esc(t.favStyle[0]):"–", t.favStyle?t.favStyle[1]+" logged":"")}
+      ${card("Best-rated style", t.bestStyle?esc(t.bestStyle):"–", t.bestStyle?t.bestAvg.toFixed(1)+"🍺 avg":"")}
+      ${card("Go-to brewery", t.favBrewery?esc(t.favBrewery[0]):"–", t.favBrewery?t.favBrewery[1]+" beers":"")}
+      ${card("Top beer", t.topBeer?esc(t.topBeer.name):"–", t.topBeer&&t.topBeer.rating?t.topBeer.rating+"/5 🍺":"")}
+      ${card("Avg strength", t.avgABV!=null?t.avgABV.toFixed(1)+"%":"–", t.strongest&&t.strongest.abv?("strongest: "+esc(t.strongest.name)+" "+t.strongest.abv+"%"):"")}
+      ${card("Favourite snack", t.favSnack?esc(t.favSnack[0]):"–", t.favSnack?t.favSnack[1]+"× ordered":"")}
+    </div>
+    <div class="lean"><h3>Flavour leanings (beers per style group)</h3>${leanRows}</div>
+    <div class="modal-actions" style="margin-top:18px">
+      <button class="btn btn-ghost" onclick="closeTaste()">Close</button>
+      <button class="btn btn-primary" onclick="shareWrapped()">📤 Share my Wrapped</button>
+    </div>`;
+  document.getElementById("tasteOverlay").classList.add("open");
+}
+function closeTaste(){ document.getElementById("tasteOverlay").classList.remove("open"); }
+
+/* ---------- Share cards (PNG export) ---------- */
+function roundRect(x,rx,ry,w,h,r){ x.beginPath(); x.moveTo(rx+r,ry);
+  x.arcTo(rx+w,ry,rx+w,ry+h,r); x.arcTo(rx+w,ry+h,rx,ry+h,r);
+  x.arcTo(rx,ry+h,rx,ry,r); x.arcTo(rx,ry,rx+w,ry,r); x.closePath(); }
+function wrapText(x,text,cx,y,maxW,lh){
+  const words=(text||"").split(/\s+/); let line="";
+  for(const w of words){ const t=line?line+" "+w:w;
+    if(x.measureText(t).width>maxW && line){ x.fillText(line,cx,y); line=w; y+=lh; } else line=t; }
+  if(line) x.fillText(line,cx,y); return y+lh;
+}
+function trunc(x,text,maxW){ text=String(text); if(x.measureText(text).width<=maxW) return text;
+  while(text.length>1 && x.measureText(text+"…").width>maxW) text=text.slice(0,-1); return text+"…"; }
+function downloadCanvas(c,filename){
+  c.toBlob(blob=>{ const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+    a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }, "image/png");
+}
+
+function shareCurrentBeer(){
+  const id = document.getElementById("editId").value;
+  const b = beers.find(x=>x.id===id); if(!b) return;
+  const c = document.createElement("canvas"); c.width=800; c.height=1000;
+  const x = c.getContext("2d");
+  const g = x.createLinearGradient(0,0,0,1000); g.addColorStop(0,"#ffcf5c"); g.addColorStop(1,"#d97e00");
+  x.fillStyle=g; x.fillRect(0,0,800,1000);
+  x.fillStyle="#fffdf8"; roundRect(x,40,40,720,920,28); x.fill();
+
+  const draw = (top) => {
+    x.textAlign="center";
+    x.fillStyle="#b9801c"; x.font="900 34px 'Segoe UI',sans-serif"; x.fillText("🍺 Alex's Beers", 400, 100);
+    let y = top;
+    x.fillStyle="#2c1c0c"; x.font="900 48px 'Segoe UI',sans-serif"; y = wrapText(x, b.name, 400, y, 660, 56);
+    if(b.brewery){ x.fillStyle="#9b8466"; x.font="700 30px 'Segoe UI',sans-serif"; x.fillText(trunc(x,b.brewery,640), 400, y); y+=48; }
+    if(b.style){ x.fillStyle="#7a3d0c"; x.font="700 26px 'Segoe UI',sans-serif"; x.fillText(b.style, 400, y); y+=44; }
+    if(b.rating){ x.fillStyle="#2c1c0c"; x.font="900 40px 'Segoe UI',sans-serif"; x.fillText(b.rating+" / 5 🍺", 400, y); y+=58; }
+    if(b.notes){ x.fillStyle="#6a553a"; x.font="italic 30px 'Segoe UI',sans-serif"; y = wrapText(x, "“"+b.notes+"”", 400, y, 640, 40); y+=12; }
+    if(b.food){ x.fillStyle="#5a2e0c"; x.font="700 28px 'Segoe UI',sans-serif"; x.fillText("🍴 "+b.food+(b.foodRating?"  "+b.foodRating+"/5":""), 400, y); y+=44; }
+    if(b.place){ x.fillStyle="#9b8466"; x.font="600 26px 'Segoe UI',sans-serif"; x.fillText("📍 "+b.place, 400, y); y+=40; }
+    x.fillStyle="#b9801c"; x.font="700 22px 'Segoe UI',sans-serif"; x.fillText("Tasted & rated on Alex's Beers 🍻", 400, 928);
+    downloadCanvas(c, "alexs-beer-"+(b.name||"card").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".png");
+    toast("Tasting card saved 📤");
+  };
+
+  if(b.photo){
+    const img = new Image();
+    img.onload = () => {
+      x.save(); roundRect(x,80,150,640,300,20); x.clip();
+      const ar=img.width/img.height, tw=640, th=300; let dw,dh;
+      if(ar > tw/th){ dh=th; dw=th*ar; } else { dw=tw; dh=tw/ar; }
+      x.drawImage(img, 80+(tw-dw)/2, 150+(th-dh)/2, dw, dh); x.restore();
+      draw(510);
+    };
+    img.onerror = () => draw(200);
+    img.src = b.photo;
+  } else { draw(210); }
+}
+
+function shareWrapped(){
+  const t = computeTaste();
+  const c = document.createElement("canvas"); c.width=800; c.height=1000;
+  const x = c.getContext("2d");
+  const g = x.createLinearGradient(0,0,0,1000); g.addColorStop(0,"#3a1d06"); g.addColorStop(1,"#d97e00");
+  x.fillStyle=g; x.fillRect(0,0,800,1000);
+  x.textAlign="center";
+  x.fillStyle="#ffd98a"; x.font="900 30px 'Segoe UI',sans-serif"; x.fillText("ALEX'S BEERS", 400, 92);
+  x.fillStyle="#ffe9b0"; x.font="900 70px 'Segoe UI',sans-serif"; x.fillText("WRAPPED 🍺", 400, 168);
+  x.fillStyle="#fff"; x.font="900 130px 'Segoe UI',sans-serif"; x.fillText(String(t.total), 400, 330);
+  x.fillStyle="#ffd98a"; x.font="700 30px 'Segoe UI',sans-serif"; x.fillText("beers tasted", 400, 372);
+  const lines = [
+    ["Favourite style",   t.favStyle?t.favStyle[0]:"—"],
+    ["Go-to brewery",     t.favBrewery?t.favBrewery[0]:"—"],
+    ["Top beer",          t.topBeer?t.topBeer.name:"—"],
+    ["Favourite snack",   t.favSnack?t.favSnack[0]:"—"],
+    ["Avg strength",      t.avgABV!=null?t.avgABV.toFixed(1)+"%":"—"],
+    ["Breweries explored", String(t.breweries)],
+  ];
+  let y = 458;
+  lines.forEach(([k,v]) => {
+    x.fillStyle="#ffce7a"; x.font="700 24px 'Segoe UI',sans-serif"; x.fillText(k.toUpperCase(), 400, y);
+    x.fillStyle="#fff"; x.font="900 42px 'Segoe UI',sans-serif"; y+=48; x.fillText(trunc(x,v,700), 400, y); y+=62;
+  });
+  x.fillStyle="#ffe9b0"; x.font="700 26px 'Segoe UI',sans-serif"; x.fillText("🍻 Cheers, Alex!", 400, 952);
+  downloadCanvas(c, "alexs-beers-wrapped.png");
+  toast("Wrapped card saved 📤");
+}
+
+/* ---------- Backup / Restore ---------- */
+function exportData(){
+  const blob = new Blob([JSON.stringify(beers,null,2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "alexs-beers-backup-" + new Date().toISOString().slice(0,10) + ".json";
+  a.click(); URL.revokeObjectURL(a.href);
+  toast("Backed up "+beers.length+" beers ⬇");
+}
+function importData(e){
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if(!Array.isArray(data)) throw 0;
+      if(beers.length && !confirm("Replace your current shelf with this backup ("+data.length+" beers)?")) return;
+      beers = data; save(); render(); toast("Restored "+data.length+" beers ⬆");
+    } catch { toast("⚠ That file didn't look like a beer backup"); }
+    e.target.value="";
+  };
+  reader.readAsText(file);
+}
+
+/* ---------- Helpers ---------- */
+function esc(s){ return (s||"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove("show"), 2200);
+}
+
+// keyboard: Esc closes modal
+document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ closeModal(); closePassport(); closeMap(); closeTaste(); } });
+
+render();
+
+// ---- Phone app bits (PWA): work offline + installable home-screen icon ----
+// Skip the service worker inside the native Android app — its files are already
+// bundled offline, so we don't want web caching getting in the way.
+const isNativeApp = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+if (!isNativeApp && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const b = document.getElementById('installBtn');
+  if (b) b.style.display = '';
+});
+function installApp(){
+  if (!deferredPrompt){
+    toast('Tap your browser menu, then "Add to Home screen" 📲');
+    return;
+  }
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.finally(()=>{
+    deferredPrompt = null;
+    const b = document.getElementById('installBtn');
+    if (b) b.style.display = 'none';
+  });
+}
+window.addEventListener('appinstalled', ()=>{
+  const b = document.getElementById('installBtn');
+  if (b) b.style.display = 'none';
+  toast("Installed! Find Alex's Beers on the home screen 🍺");
+});
+</script>
+</body>
+</html>

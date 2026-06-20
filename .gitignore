@@ -1,0 +1,19 @@
+# Local Claude Code settings (machine-specific)
+.claude/settings.local.json
+
+# Node
+node_modules/
+
+# Generated app web folder (rebuilt from index.html by copy:web)
+www/
+
+# Android build outputs / local machine bits
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/captures/
+android/app/src/main/assets/public/
+*.iml
+.DS_Store

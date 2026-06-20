@@ -1,6 +1,9 @@
 # Local Claude Code settings (machine-specific)
 .claude/settings.local.json
 
+# Downloaded build artifacts (the .apk we pull from GitHub)
+dist/
+
 # Node
 node_modules/
 

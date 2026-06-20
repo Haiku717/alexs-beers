@@ -37,11 +37,29 @@ Open `index.html` (▶ Launch) → **＋ Add a beer** → fill it in → **Save 
   style, go-to brewery, top beer, avg strength, favourite snack, flavour-leaning bars); 📤 **share
   cards** — export a PNG tasting card for any beer, or an "Alex's Beers **Wrapped**" summary card.
 - **Polish — DONE:** "Top snack" added to the stats bar; share-a-card to mates (the PNG export).
-- **Still to come:** wrap the whole thing into a phone app (structural — separate job).
+- **Phone app — DONE (first build):** wrapped as a real offline **Android app** with Capacitor.
+  The single `index.html` is bundled inside the app (no hosting, no internet needed). Built and
+  signed in the cloud via **GitHub Actions** (no Android Studio on Greg's PC). Repo:
+  github.com/Haiku717/alexs-beers (private). First `app-debug.apk` built successfully and
+  downloaded to `dist/`.
+
+## How the Android build works
+- `index.html` stays the single source of truth. `scripts/copy-web.mjs` copies it (+ icons +
+  manifest) into `www/`, which Capacitor bundles. `sw.js` is left out of the app on purpose
+  (files are already local); the service worker is skipped at runtime when `window.Capacitor` is
+  present.
+- To make a new version: edit `index.html`, then `git commit` + `git push`. GitHub Actions
+  rebuilds the APK automatically. Download it from the run's Artifacts (or
+  `gh run download <id> --dir dist`).
+- gh CLI lives at `C:\Program Files\GitHub CLI\gh.exe` (not on PATH). Login = account "Haiku717".
 
 ## Next Steps
-- [ ] Greg to open it, add a few real beers, try the Map / My Taste / Share, show Alex
-- [ ] When ready: turn it into a phone app (the last Wave 3 piece)
+- [ ] Greg to sideload `dist/alexs-beers-apk/app-debug.apk` onto his phone, test, then send to Alex
+- [ ] Swap Capacitor's default launcher icon for the custom pint icon (have `icon-512.png`)
+- [ ] BEFORE Alex relies on it: set up a **stable signing key** (GitHub secret) so future updates
+      install over the old app without uninstalling. Right now each cloud build uses a fresh debug
+      key, so updating means uninstall+reinstall (use the in-app "Back up my beers" + restore to
+      keep history safe across that).
 - [ ] Possible extras: real GPS map (needs internet + a map service — trade-off vs offline),
       photo on the share card looks best with a landscape shot
 

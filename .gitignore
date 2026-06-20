@@ -1,6 +1,11 @@
 # Local Claude Code settings (machine-specific)
 .claude/settings.local.json
 
+# Signing key — kept out of git; lives only in GitHub secrets + locally
+android/keystore/
+*.jks
+*.keystore
+
 # Downloaded build artifacts (the .apk we pull from GitHub)
 dist/
 

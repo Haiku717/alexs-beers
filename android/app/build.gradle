@@ -16,10 +16,28 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            // Permanent key so app updates install over the top without wiping
+            // saved data. The key + passwords come from GitHub secrets at build
+            // time (see .github/workflows/build-apk.yml) — never stored in git.
+            def ksFile = file('../keystore/release.jks')
+            if (ksFile.exists()) {
+                storeFile ksFile
+                storePassword System.getenv('KEYSTORE_PASSWORD')
+                keyAlias System.getenv('KEY_ALIAS')
+                keyPassword System.getenv('KEY_PASSWORD')
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // Only sign when the key is present (it is in CI); otherwise build unsigned.
+            if (file('../keystore/release.jks').exists()) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }

@@ -37,29 +37,36 @@ Open `index.html` (▶ Launch) → **＋ Add a beer** → fill it in → **Save 
   style, go-to brewery, top beer, avg strength, favourite snack, flavour-leaning bars); 📤 **share
   cards** — export a PNG tasting card for any beer, or an "Alex's Beers **Wrapped**" summary card.
 - **Polish — DONE:** "Top snack" added to the stats bar; share-a-card to mates (the PNG export).
-- **Phone app — DONE (first build):** wrapped as a real offline **Android app** with Capacitor.
-  The single `index.html` is bundled inside the app (no hosting, no internet needed). Built and
-  signed in the cloud via **GitHub Actions** (no Android Studio on Greg's PC). Repo:
-  github.com/Haiku717/alexs-beers (private). First `app-debug.apk` built successfully and
-  downloaded to `dist/`.
+- **Phone app — DONE:** wrapped as a real offline **Android app** with Capacitor. The single
+  `index.html` is bundled inside the app (no hosting, no internet needed). Built in the cloud via
+  **GitHub Actions** (no Android Studio on Greg's PC). Repo: github.com/Haiku717/alexs-beers
+  (private). Custom hand-drawn pint launcher icon (adaptive, all densities). Signed **release**
+  APK (`app-release.apk`) with a permanent key, so updates install over the top WITHOUT wiping
+  Alex's data. Latest build downloaded to `dist/alexs-beers-apk/app-release.apk`.
 
 ## How the Android build works
 - `index.html` stays the single source of truth. `scripts/copy-web.mjs` copies it (+ icons +
   manifest) into `www/`, which Capacitor bundles. `sw.js` is left out of the app on purpose
   (files are already local); the service worker is skipped at runtime when `window.Capacitor` is
   present.
-- To make a new version: edit `index.html`, then `git commit` + `git push`. GitHub Actions
-  rebuilds the APK automatically. Download it from the run's Artifacts (or
-  `gh run download <id> --dir dist`).
+- To make a new version: bump `versionCode`/`versionName` in `android/app/build.gradle`, edit
+  `index.html`, then `git commit` + `git push`. GitHub Actions rebuilds the signed APK
+  automatically. Download it from the run's Artifacts (or `gh run download <id> --dir dist`).
+- Icons: edit `make-app-assets.ps1` → run it → `npx @capacitor/assets generate --android`.
 - gh CLI lives at `C:\Program Files\GitHub CLI\gh.exe` (not on PATH). Login = account "Haiku717".
 
+## Signing key (important)
+- The release APK is signed with a permanent key. The key + passwords live ONLY in GitHub
+  **repo secrets** (`ANDROID_KEYSTORE_B64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`,
+  `ANDROID_KEY_PASSWORD`) and a local copy at `android/keystore/release.jks` (gitignored, never
+  committed). Same key every build = updates install over the top, data preserved.
+- Don't lose the key: if both the local `release.jks` AND the secret were ever lost, a new key
+  would force an uninstall/reinstall (data loss) on the next update. Keep a safe backup of
+  `android/keystore/release.jks`.
+
 ## Next Steps
-- [ ] Greg to sideload `dist/alexs-beers-apk/app-debug.apk` onto his phone, test, then send to Alex
-- [ ] Swap Capacitor's default launcher icon for the custom pint icon (have `icon-512.png`)
-- [ ] BEFORE Alex relies on it: set up a **stable signing key** (GitHub secret) so future updates
-      install over the old app without uninstalling. Right now each cloud build uses a fresh debug
-      key, so updating means uninstall+reinstall (use the in-app "Back up my beers" + restore to
-      keep history safe across that).
+- [ ] Greg to sideload `dist/alexs-beers-apk/app-release.apk` onto his phone, test, then send to Alex
+- [ ] Back up `android/keystore/release.jks` somewhere safe (e.g. password manager / Drive)
 - [ ] Possible extras: real GPS map (needs internet + a map service — trade-off vs offline),
       photo on the share card looks best with a landscape shot
 

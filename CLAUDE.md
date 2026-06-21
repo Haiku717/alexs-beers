@@ -55,6 +55,47 @@ Open `index.html` (▶ Launch) → **＋ Add a beer** → fill it in → **Save 
 - Icons: edit `make-app-assets.ps1` → run it → `npx @capacitor/assets generate --android`.
 - gh CLI lives at `C:\Program Files\GitHub CLI\gh.exe` (not on PATH). Login = account "Haiku717".
 
+## iPhone version (PWA via GitHub Pages) — DONE
+- Alex has an iPhone, so alongside the Android app we host the SAME `index.html` as an installable
+  web app. Apple blocks easy sideloading (a real native iOS app needs a Mac + $99/yr Apple
+  Developer account + TestFlight), so the "Add to Home Screen" PWA route is the sensible path.
+- **The repo was made PUBLIC** (was private) so free GitHub Pages can serve it. Pages = main branch
+  root. Live URL: **https://haiku717.github.io/alexs-beers/** . The signing key is NOT exposed
+  (gitignored + in repo secrets only).
+- Greg already confirmed the privacy point: ALL of Alex's data (beers, notes, photos) is stored in
+  the phone's `localStorage` only (index.html ~L544–548). There are ZERO network calls / analytics /
+  uploads in the app — Pages just serves the static file, it never receives any logged data. The
+  only data that leaves the phone is what Alex deliberately exports (backup file / share card).
+- The app was already PWA-ready: apple meta tags + `manifest.webmanifest` + relative-path service
+  worker (`sw.js`), so it works fine on the `/alexs-beers/` sub-path and offline after first load.
+- Install on iPhone: open the URL in **Safari** → Share → **Add to Home Screen** → Add (do it once
+  with signal so it caches for offline). Updates are automatic — push to `index.html`, Pages
+  redeploys, the network-first service worker pulls the new version next time it's online.
+
+## Shared log between mates (Supabase) — DONE
+- The app is no longer a solo on-device diary: it's a **shared beer log for the crew**, synced via a
+  free **Supabase** database. Both the Android app and the iPhone PWA use the SAME `index.html`, so
+  they share one shelf.
+- **How it works:** localStorage is still the offline cache + instant render. On load (and on app
+  focus / coming back online) it pulls the shared shelf and merges. Adds/edits/deletes push to the
+  cloud immediately when online, or queue locally (`_dirty` flag / `ab-pending-deletes`) and sync
+  later. Each beer has a uuid `id` (cloud primary key) + `addedBy`. Nothing is lost offline.
+- **Identity:** first open shows a passcode gate (`GROUP_PASSCODE = beers2026`), then asks the
+  user's name (stored in `localStorage` `ab-name`). No real auth. Every beer is stamped
+  "added by [name]"; there's an Everyone/[person] filter + a shared/offline status chip (tap to
+  change name).
+- **Supabase config is in `index.html`** near the top of the `<script>`: `SUPABASE_URL`,
+  `SUPABASE_KEY` (the `sb_publishable_...` key — public by design), `GROUP_PASSCODE`. Project ref:
+  `ccfyjufocwkmlozgsjim`. Table `beers (id uuid pk, created_at, added_by text, data jsonb)` with RLS
+  policies allowing anon select/insert/update/delete. The Supabase JS lib loads from jsDelivr CDN at
+  runtime; offline it just works locally.
+- **Service worker (`sw.js` v3):** now only caches same-origin app files. Cross-origin requests
+  (Supabase API + the CDN lib) always hit the network, so the shared shelf is never stale.
+- **Security note (told Greg):** the passcode is a friendly gate, not real security. The publishable
+  key is in the public repo, so anyone who reads the source could reach the DB. Fine for "just beers".
+  To tighten later: lock RLS down or move the key behind a serverless function.
+- Verified live before shipping: Supabase read (200), insert (201), delete (204) all OK with the key.
+
 ## Signing key (important)
 - The release APK is signed with a permanent key. The key + passwords live ONLY in GitHub
   **repo secrets** (`ANDROID_KEYSTORE_B64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`,
@@ -65,7 +106,10 @@ Open `index.html` (▶ Launch) → **＋ Add a beer** → fill it in → **Save 
   `android/keystore/release.jks`.
 
 ## Next Steps
-- [ ] Greg to sideload `dist/alexs-beers-apk/app-release.apk` onto his phone, test, then send to Alex
+- [x] Greg sideloaded `app-release.apk`, tested, working well (2026-06-21)
+- [ ] Send Alex the iPhone link: https://haiku717.github.io/alexs-beers/ → Safari → Share → Add to Home Screen. Passcode: beers2026
+- [ ] Test the shared log: add a beer on one phone, confirm it shows on another (with "added by")
+- [ ] Grab the new signed APK (v1.1, shared-log) from the latest GitHub Actions run for Android
 - [ ] Back up `android/keystore/release.jks` somewhere safe (e.g. password manager / Drive)
 - [ ] Possible extras: real GPS map (needs internet + a map service — trade-off vs offline),
       photo on the share card looks best with a landscape shot

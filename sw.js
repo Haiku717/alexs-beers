@@ -1,6 +1,6 @@
 /* Alex's Beers — offline service worker.
    Caches the app so it opens with no internet once it's been loaded once. */
-const CACHE = 'alexs-beers-v2';
+const CACHE = 'alexs-beers-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -26,6 +26,10 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const req = e.request;
+  // Only ever cache the app's own files. Anything cross-origin (the shared
+  // beer database on Supabase, the Supabase library on the CDN) must always go
+  // straight to the network so the shared shelf is live, never stale.
+  if (new URL(req.url).origin !== self.location.origin) return;
   const isPage = req.mode === 'navigate' ||
                  (req.headers.get('accept') || '').includes('text/html');
 

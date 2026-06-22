@@ -109,12 +109,27 @@ Open `index.html` (▶ Launch) → **＋ Add a beer** → fill it in → **Save 
 - [x] Greg sideloaded `app-release.apk`, tested, working well (2026-06-21)
 - [ ] Send Alex the iPhone link: https://haiku717.github.io/alexs-beers/ → Safari → Share → Add to Home Screen. Passcode: beers2026
 - [ ] Test the shared log: add a beer on one phone, confirm it shows on another (with "added by")
-- [ ] Grab the new signed APK (v1.1, shared-log) from the latest GitHub Actions run for Android
+- [x] Grabbed the new signed APK (v1.1, shared-log) → `dist/alexs-beers-apk/app-release.apk` (2026-06-22)
 - [ ] Back up `android/keystore/release.jks` somewhere safe (e.g. password manager / Drive)
 - [ ] Possible extras: real GPS map (needs internet + a map service — trade-off vs offline),
       photo on the share card looks best with a landscape shot
 
 ## Session Log
+### 2026-06-22
+Wrap-up session. Confirmed the v1.1 (shared-log) Android build succeeded in GitHub Actions and
+downloaded the signed `app-release.apk` to `dist/` (ready to send Alex / sideload). Committed the
+project notes documenting the iPhone PWA + Supabase shared-log work. Remaining: send Alex the
+iPhone link, test the shared sync across two phones, and back up the signing key.
+
+### 2026-06-21
+Tested + shipped the Android APK (working well). Added an **iPhone version** by hosting the same
+`index.html` as an installable PWA on **GitHub Pages** (repo made public). Then the big one: turned
+the app from a solo on-device diary into a **shared crew log** via **Supabase** — passcode gate
+(`beers2026`) + "what's your name" on first open, every beer stamped "added by [name]", Everyone/
+[person] filter, offline-safe sync. Service worker bumped to v3 (only caches app files so the shared
+shelf is never stale). Verified the Supabase read/insert/delete live before shipping. Bumped Android
+to v1.1 so it gets the shared log too. iPhone link live: https://haiku717.github.io/alexs-beers/
+
 ### 2026-06-20
 Convened the council (Pragmatist/Explorer/Critic/Mentor) → settled on "fun beer journal at heart,
 durable storage, start small". Built Wave 1 as a single self-contained HTML app and filed it under
